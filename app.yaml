@@ -1,5 +1,4 @@
-application: prayer-198421
-version: 1
+application:
 runtime: python27
 api_version: 1
 threadsafe: no

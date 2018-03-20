@@ -29,6 +29,67 @@ def updateUser():
     userInfo[0]['pawnURL'] = request.json.get('pawnURL')
     userInfo[0].put()
 
+
+@post('/prayerUpdate')
+def prayerUpdate():
+    user = users.get_current_user()
+    userID = user.user_id()
+    userInfo = models.PrayerWarrior.query().filter(models.PrayerWarrior.userID == userID).fetch(1)
+    
+    if userInfo is None:
+        logging.info("prayerUpdate")
+        logging.info(request.json.get('days'))
+        user = models.PrayerWarrior(userID=userID, days=request.json.get('days'))
+        user.put()
+    else:
+        userInfo[0].days = request.json.get('days')
+        userInfo[0].put()
+
+    return json.dumps([])    
+
+@get('/prayers/')
+def get_all_prayers():
+    logging.info("Getting all the prayers")
+    prayers = models.PrayerWarrior.query().fetch()
+
+    to_return = [[0 for x in range(7)] for y in range(96)] 
+
+    for prayer in prayers:
+        i = 0
+        for time in prayer.days:
+            if time == -1:
+                continue
+            # if there is a time selected add it to our counter    
+            to_return[time][i] += 1
+            i += 1
+
+
+    response.content_type = 'application/json'
+    return json.dumps(to_return)
+
+@get('/myprayers/')
+def get_my_prayers():
+    user = users.get_current_user()
+    userID = user.user_id()
+    userInfo = models.PrayerWarrior.query().filter(models.PrayerWarrior.userID == userID).fetch(1)
+
+    to_return = [-1 for x in range(7)] 
+    response.content_type = 'application/json'
+
+    if userInfo is None or len(userInfo) == 0:
+        logging.info("myprayers")
+        logging.info(to_return)
+        return json.dumps(to_return)
+
+    if len(userInfo[0].days) > 0:
+        current = 0
+        for day in userInfo[0].days:
+            to_return[current] = day
+            current += 1
+
+    return json.dumps(to_return)
+
+
 @get('/comments/')
 def get_all_comments():
     logging.info("Getting all comments!")

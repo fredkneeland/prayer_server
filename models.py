@@ -2,6 +2,9 @@ import logging
 
 from google.appengine.ext import ndb
 
+class PrayerWarrior(ndb.Model):
+    days = ndb.IntegerProperty(repeated=True)
+    userID = ndb.StringProperty()
 
 class Comment(ndb.Model):
     created = ndb.DateTimeProperty(auto_now_add=True)

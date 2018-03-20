@@ -1,6 +1,8 @@
 (function($) {
   "use strict"; // Start of use strict
 
+  var days = [0,0,0,0,0,0,0];
+
   // Closes the sidebar menu
   $(".menu-toggle").click(function(e) {
     e.preventDefault();
@@ -19,7 +21,7 @@
           scrollTop: target.offset().top
         }, 1000, "easeInOutExpo");
         return false;
-      }
+      }   
     }
   });
 
@@ -46,24 +48,51 @@
   var onClickFunction = function(i, j) {
     var divId = "#div"+i+"_" + j;
     return function(e) {
-      console.log("onClickFunction ahppening");
+      console.log("LETS GO!!!!!  Yeah boys i: " + i + ", j: " + j);
       var opacity = $(divId).css("opacity");
-      var color = $(divId).css("background-color");
 
-      console.log(color);
+      // revert selection
+      if (days[j-1] == i) {
+        days[j-1] = -1;
 
-      if (color == "rgb(50, 205, 50)") {
+        // increase opacity
         opacity *= 2;
         $(divId).css("opacity", opacity);
-        $(divId).css("background-color", "#333");
-      } else {
+      } else if (days[j-1] >= 0) {
+        // clear old
+        console.log("we have this day..."+days[j-1]+"_"+j)
+        var oldDiv = "#div"+days[j-1]+"_"+j;
+        var oldOpacity = $(oldDiv).css("opacity");
+        oldOpacity *= 2;
+        console.log("old Opacity: " + oldOpacity);
+        $(oldDiv).css("opacity", oldOpacity);
+
+        // set new
         opacity /= 2;
         $(divId).css("opacity", opacity);
-        // $(divId).css("background-color", "#32CD32");
-        // $(divId).css("border-style", "solid");
-        // $(divId).css("border-width", "3px");
-        // $(divId).css("border-color", "#32CD32")
+      } else {
+        console.log("We havent set this day yet...");
+        opacity /= 2;
+        $(divId).css("opacity", opacity);
       }
+
+      days[j-1] = i
+
+      console.log("days: " + days);
+
+      // send updated data to the server
+      $.ajax({
+        url: '/prayerUpdate',
+        dataType: 'json',
+        contentType: 'application/json; charset=utf-8',
+        type: 'POST',
+        data: JSON.stringify({'days': days}),
+        error: function(xhr, status, err) {
+          console.log(xhr);
+          console.log("hi");
+            console.error('/myprayers/', status, err.toString());
+        }.bind(this)
+      });
     }
   }
 
@@ -174,6 +203,52 @@
       $("#div"+i+'_'+j).on('click', onClickFunction(i, j));
     }
   }
+
+
+  // get personal user data
+  $.ajax({
+    url: '/myprayers/',
+    dataType: 'json',
+    contentType: 'application/json; charset=utf-8',
+    type: 'GET',
+    success: function(data) {
+       days = data;
+     }.bind(this),
+     error: function(xhr, status, err) {
+       console.log(xhr);
+       console.log("hi");
+        console.error('/myprayers/', status, err.toString());
+     }.bind(this)
+  });
+
+
+  // get data from server and update image properties
+  $.ajax({
+                url: '/prayers/',
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                type: 'GET',
+                success: function(data) {
+                    console.log("total data: " + data);
+
+                    for (var j = 0; j < data.length; j++) {
+                      console.log("j: " + j + " data: " + data[j]);
+                      for (var i = 0; i < data[j].length; i++) {
+                        var count = data[j][i];
+                        // console.log("i: " + i + " j: " + j + " count: "+ count);
+                        if (count > 0) {
+                          var divId = "#div"+(j)+"_" + (i+1);
+                          var opacity = $(divId).css("opacity");
+                          opacity /= (1+count);
+                          $(divId).css("opacity", opacity);
+                        }
+                      }
+                    }
+                }.bind(this),
+                error: function(xhr, status, err) {
+                    console.error('idk even know...', '/prayers/', status, err.toString());
+                }.bind(this)
+            });
 
 })(jQuery); // End of use strict
 
