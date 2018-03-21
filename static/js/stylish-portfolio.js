@@ -48,11 +48,10 @@
   var onClickFunction = function(i, j) {
     var divId = "#div"+i+"_" + j;
     return function(e) {
-      console.log("LETS GO!!!!!  Yeah boys i: " + i + ", j: " + j);
       var opacity = $(divId).css("opacity");
 
       // revert selection
-      if (days[j-1] == i) {
+      if (days[j-1] == (i-1)) {
         days[j-1] = -1;
 
         // increase opacity
@@ -60,25 +59,24 @@
         $(divId).css("opacity", opacity);
       } else if (days[j-1] >= 0) {
         // clear old
-        console.log("we have this day..."+days[j-1]+"_"+j)
-        var oldDiv = "#div"+days[j-1]+"_"+j;
+        var oldDiv = "#div"+(days[j-1]+1)+"_"+j;
         var oldOpacity = $(oldDiv).css("opacity");
         oldOpacity *= 2;
-        console.log("old Opacity: " + oldOpacity);
         $(oldDiv).css("opacity", oldOpacity);
+
+        // set days to be this value
+        // subtract 1 so that it fits into the 0 index array pattern
+        days[j-1] = i - 1
 
         // set new
         opacity /= 2;
         $(divId).css("opacity", opacity);
       } else {
-        console.log("We havent set this day yet...");
+        // set days to be this value
+        days[j-1] = i - 1
         opacity /= 2;
         $(divId).css("opacity", opacity);
       }
-
-      days[j-1] = i
-
-      console.log("days: " + days);
 
       // send updated data to the server
       $.ajax({
@@ -88,8 +86,6 @@
         type: 'POST',
         data: JSON.stringify({'days': days}),
         error: function(xhr, status, err) {
-          console.log(xhr);
-          console.log("hi");
             console.error('/myprayers/', status, err.toString());
         }.bind(this)
       });
@@ -138,14 +134,6 @@
     } else {
       hours = 1 + parseInt((i - 53) / 4);
     }
-    // hours = 1 + parseInt((i - 5) / 4);
-
-    // if (i <= 48) {
-    //   hours = 1 + parseInt((i - 1) / 4);
-    //   // hours = 12 - parseInt(((i - 1) / 4))
-    // } else {
-    //   hours = 1 + parseInt((i - 49) / 4);
-    // }
 
     var minutes = "00";
 
@@ -212,64 +200,45 @@
     contentType: 'application/json; charset=utf-8',
     type: 'GET',
     success: function(data) {
+      console.log(data);
        days = data;
      }.bind(this),
      error: function(xhr, status, err) {
-       console.log(xhr);
-       console.log("hi");
-        console.error('/myprayers/', status, err.toString());
+       console.error('/myprayers/', status, err.toString());
      }.bind(this)
   });
 
 
   // get data from server and update image properties
-  $.ajax({
-                url: '/prayers/',
-                dataType: 'json',
-                contentType: 'application/json; charset=utf-8',
-                type: 'GET',
-                success: function(data) {
-                    console.log("total data: " + data);
+  var updateFromServer = function() {
+      $.ajax({
+        url: '/prayers/',
+        dataType: 'json',
+        contentType: 'application/json; charset=utf-8',
+        type: 'GET',
+        success: function(data) {
+            for (var j = 0; j < data.length; j++) {
+              for (var i = 0; i < data[j].length; i++) {
+                var count = data[j][i];
+                var divId = "#div"+(j+1)+"_" + (i+1);
 
-                    for (var j = 0; j < data.length; j++) {
-                      console.log("j: " + j + " data: " + data[j]);
-                      for (var i = 0; i < data[j].length; i++) {
-                        var count = data[j][i];
-                        // console.log("i: " + i + " j: " + j + " count: "+ count);
-                        if (count > 0) {
-                          var divId = "#div"+(j)+"_" + (i+1);
-                          var opacity = $(divId).css("opacity");
-                          opacity /= (1+count);
-                          $(divId).css("opacity", opacity);
-                        }
-                      }
-                    }
-                }.bind(this),
-                error: function(xhr, status, err) {
-                    console.error('idk even know...', '/prayers/', status, err.toString());
-                }.bind(this)
-            });
+                if (count > 0) {
+                  var opacity = 1 / (1+count);
+                  $(divId).css("opacity", opacity);
+                } else {
+                  $(divId).css("opacity", 1);
+                }
+              }
+            }
+        }.bind(this),
+        error: function(xhr, status, err) {
+            console.error('/prayers/', status, err.toString());
+        }.bind(this)
+    });
+  }
+
+  updateFromServer();
+  // update once a minute
+  setInterval(updateFromServer, 60000);
 
 })(jQuery); // End of use strict
-
-// Disable Google Maps scrolling
-// See http://stackoverflow.com/a/25904582/1607849
-// Disable scroll zooming and bind back the click event
-var onMapMouseleaveHandler = function(event) {
-  var that = $(this);
-  that.on('click', onMapClickHandler);
-  that.off('mouseleave', onMapMouseleaveHandler);
-  that.find('iframe').css("pointer-events", "none");
-}
-
-var onMapClickHandler = function(event) {
-  var that = $(this);
-  // Disable the click handler until the user leaves the map area
-  that.off('click', onMapClickHandler);
-  // Enable scrolling zoom
-  that.find('iframe').css("pointer-events", "auto");
-  // Handle the mouse leave event
-  that.on('mouseleave', onMapMouseleaveHandler);
-}
-// Enable map zooming with mouse scroll when the user clicks the map
-$('.map').on('click', onMapClickHandler);
