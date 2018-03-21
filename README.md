@@ -18,13 +18,11 @@ Check out gulpfile.js to see what all is being watched and built.
 
 Run:
 
+```
 $ npm install
 $ gulp dev
+```
 
 ## Bugs and Issues
 
 Add an issue here or submit a pull request!
-
-## Custom Builds
-
-You can hire Start Bootstrap to create a custom build of any template, or create something from scratch using Bootstrap. For more information, visit the **[custom design services page](https://startbootstrap.com/bootstrap-design-services/)**.
