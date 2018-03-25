@@ -95,9 +95,15 @@
   var generateRowElement = function(i) {
     var rowHTML = '<div class="row calendar-row">';
 
+    // all 7 days of the week
     for (var j = 1; j < 8; j++) {
       rowHTML += generateButtonElement(i, j);  
     }
+
+    // if we want to limit which days of the week we do
+    // for (var j = 2; j < 5; j++) {
+    //   rowHTML += generateButtonElement(i, j);  
+    // }
 
     rowHTML += "</div>"
 
@@ -185,6 +191,11 @@
     generateRowElement(i);
   }
 
+  // if we want to limit the time slots to 5am to 10 pm
+  // for (var i = 21; i < 89; i++) {
+  //   generateRowElement(i);
+  // }
+
   // generate event listeners
   for (var i = 1; i < 97; i++) {
     for (var j = 1; j < 8; j++) {
@@ -192,6 +203,57 @@
     }
   }
 
+  // $("#myTimes").toggle(function() {
+  //  console.log("A"); 
+  // }, function() {
+  //   console.log("B");
+  // });
+
+  var highlightsOn = false;
+  var myTimes = "#myTimes"
+
+  $("#myTimes").on('click', function() {
+    $(myTimes).toggleClass('btn-outline-success btn-secondary');
+
+    if (highlightsOn) {
+      $(myTimes).text("Highlight My Times");
+      for (var j = 0; j < days.length; j++) {
+        var i = days[j]+1;
+        var divId = "#div"+i+"_" + (j+1);
+
+        $(divId).css('background-color', '#333');
+        $(divId).css('opacity', serverData[i][j+1]);
+      }
+    } else {
+      $(myTimes).text("Hide my Times");
+      for (var j = 0; j < days.length; j++) {
+        var i = days[j]+1;
+        var divId = "#div"+i+"_" + (j+1);
+
+        $(divId).css('background-color', '#28a745');
+        $(divId).css('opacity', '0.75');
+      }
+    }
+
+    highlightsOn = !highlightsOn;
+  }.bind(this));
+
+  // lets generate some calendar events!!!
+
+  $("#calendarInvites", function() {
+    console.log("Adding persecuted church events to calendar");
+      // Tell the server to add calendar data
+      $.ajax({
+        url: '/generateEvents',
+        dataType: 'json',
+        contentType: 'application/json; charset=utf-8',
+        type: 'POST',
+        data: JSON.stringify({}),
+        error: function(xhr, status, err) {
+            console.error('/myprayers/', status, err.toString());
+        }.bind(this)
+      });
+  });
 
   // get personal user data
   $.ajax({
@@ -208,6 +270,7 @@
      }.bind(this)
   });
 
+  var serverData = [97][7];
 
   // get data from server and update image properties
   var updateFromServer = function() {
@@ -217,19 +280,20 @@
         contentType: 'application/json; charset=utf-8',
         type: 'GET',
         success: function(data) {
-            for (var j = 0; j < data.length; j++) {
-              for (var i = 0; i < data[j].length; i++) {
-                var count = data[j][i];
-                var divId = "#div"+(j+1)+"_" + (i+1);
+          serverData = data;
+          for (var j = 0; j < data.length; j++) {
+            for (var i = 0; i < data[j].length; i++) {
+              var count = data[j][i];
+              var divId = "#div"+(j+1)+"_" + (i+1);
 
-                if (count > 0) {
-                  var opacity = 1 / (1+count);
-                  $(divId).css("opacity", opacity);
-                } else {
-                  $(divId).css("opacity", 1);
-                }
+              if (count > 0) {
+                var opacity = 1 / (1+count);
+                $(divId).css("opacity", opacity);
+              } else {
+                $(divId).css("opacity", 1);
               }
             }
+          }
         }.bind(this),
         error: function(xhr, status, err) {
             console.error('/prayers/', status, err.toString());
