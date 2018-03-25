@@ -87,7 +87,7 @@ h6 {
   height: auto;
   padding-top: 8rem;
   padding-bottom: 8rem;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.1) 100%), url("../img/Dillion1.jpg");
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.1) 100%), url("../img/Dillion2.jpg");
   background-position: center center;
   background-repeat: no-repeat;
   background-size: cover;
@@ -224,9 +224,8 @@ h6 {
 }
 
 .callout {
-  min-height: 30rem;
+  height: 960px;
   width: 100%;
-  height: auto;
   padding: 0;
   background: linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.1) 100%), url("../img/prayer1.jpg");
   background-position: center center;
@@ -244,7 +243,7 @@ h6 {
 
 @media (min-width: 992px) {
   .callout {
-    height: 100vh;
+    height: 960px;
   }
   .callout h1 {
     font-size: 5.5rem;
@@ -303,7 +302,7 @@ h6 {
   font-size: 1.2rem;
 }
 
-@media (min-width: 992px) {
+@media (min-width: 400px) {
   .portfolio-item {
     max-width: none;
     margin: 0;
@@ -413,6 +412,10 @@ a:hover, a:focus, a:active {
 
 .text-secondary {
   color: #ecb807 !important;
+}
+
+.calendar-header h2 {
+  text-align: center;
 }
 
 .calendar-header h3 {
