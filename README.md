@@ -1,6 +1,4 @@
-# [247prayer](https://247prayer.org)
-
-[247prayer.org](http://247prayer.org) is a website for organizing around the clock prayer
+# [247](https://247prayer.org)
 
 ## Usage
 
